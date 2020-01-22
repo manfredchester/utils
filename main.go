@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"test/azureType"
+	"test/zhlog"
 )
 
 func main() {
@@ -11,7 +13,15 @@ func main() {
 	// err := f()
 	// fmt.Println("Returned normally from f.", err)
 	// split()
-	mapp()
+	// mapp()
+	orm := CloudprojectEngine()
+	orm.ShowSQL(true)
+	dataTo := make([]azureType.BillAzureDetailReportMetadata, 0)
+
+	err := orm.Where("bill_account_uuid=?", 1101).And("deleted=0").OrderBy("uuid").Limit(10, 10).Find(&dataTo)
+	fmt.Println("erer:", err)
+
+	zhlog.Error("Begin", "%s", err.Error())
 }
 
 func mapp() {
