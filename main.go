@@ -1,97 +1,77 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"strings"
-	"test/azureType"
-	"test/zhlog"
+	"time"
 )
 
 func main() {
-	// gotoloop()
-	// err := f()
-	// fmt.Println("Returned normally from f.", err)
-	// split()
-	// mapp()
-	orm := CloudprojectEngine()
-	orm.ShowSQL(true)
-	dataTo := make([]azureType.BillAzureDetailReportMetadata, 0)
+	// consul utils
+	// s, _ := GetConsulInfo("test", "10.128.0.180:8500")
+	// fmt.Println(string(s))
+	// WriteConsulInfo("test", `{'test':tes}`, "10.128.0.180:8500")
+	// DelConsulInfo("test", "10.128.0.180:8500")
 
-	err := orm.Where("bill_account_uuid=?", 1101).And("deleted=0").OrderBy("uuid").Limit(10, 10).Find(&dataTo)
-	fmt.Println("erer:", err)
-
-	zhlog.Error("Begin", "%s", err.Error())
+	// CompareMap
+	// testtt()
+	fmt.Println(GetFieldName(Student{}))
+	fmt.Println(GetFieldName(&Student{}))
+	fmt.Println(GetTagName(&Student{}))
+	fmt.Println(GetFieldName(Teacher{}))
 }
-
-func mapp() {
-	test := make(map[string]interface{})
-
-	// ele1 := make(map[string]string)
-	test["key1"] = "val1"
-
-	// ele2 := make(map[string][]string)
-	test["key2"] = []string{"val2", "val22"}
-
-	// test = append(test, ele1)
-
-	// test = append(test, ele2)
-	fmt.Println("test:", test)
-	// map[string]
-}
-
-func split() {
-	tag := "key:cluster value:master test:qqq"
-	ele := strings.Split(tag, " ")
-	fmt.Println("ele:", ele)
-	if len(ele) > -2 {
-		fmt.Println("len(ele):", len(ele))
+func testtt() {
+	time := time.Now()
+	var map1 map[string]interface{}
+	map1 = make(map[string]interface{})
+	map1["japan"] = "tokyo"
+	map1["china"] = "beijing"
+	map1["america"] = "washington"
+	map1["korea"] = "seoul"
+	map1["england"] = "london"
+	map1["int"] = 19
+	map1["time1"] = time
+	map1["float"] = 0.9
+	map1["int64"] = 9223372036854775807
+	var map2 map[string]interface{}
+	map2 = make(map[string]interface{})
+	map2["japan"] = "beijing"
+	map2["china"] = "tokyo"
+	map2["america"] = "washington"
+	map2["french"] = "paris"
+	map2["canada"] = "ottawa"
+	map2["int"] = 1
+	map2["time1"] = time
+	map2["float"] = 0.8
+	map2["int64"] = 9223372036854775806
+	newMap := CompareMap(map1, map2)
+	for key, value := range newMap {
+		fmt.Printf("key:%v   value:%v\n", key, value)
 	}
-	for k, v := range ele {
-		if k > 1 {
-			break
-		}
-		s := strings.Split(v, ":")
-		fmt.Println("s:", s)
-		if s[0] == "key" {
-			fmt.Println("key:", s[1])
-		}
-		if s[0] == "value" {
-			fmt.Println("value:", s[1])
-		}
-	}
+
 }
 
-func f() (err error) {
-	defer func() {
-		fmt.Println("Calling g.")
-		if e := recover(); e != nil {
-			fmt.Println("Recovered in f", e)
-			err = errors.New("new")
+func CompareMap(mapOne map[string]interface{}, mapTwo map[string]interface{}) map[string]string {
+	newMap := make(map[string]string)
+	for key1, value1 := range mapOne {
+		if value2, ok := mapTwo[key1]; ok {
+			if value1 != value2 {
+				newMap[key1] = fmt.Sprintf("[%v]->[%v]", value1, value2)
+			}
+			delete(mapTwo, key1)
+		} else {
+			newMap[key1] = fmt.Sprintf("[%v]->[]", value1)
 		}
-	}()
-	fmt.Println("Calling g.")
-	g(0)
-	fmt.Println("Returned normally from g.")
-	return nil
+	}
+	for key, value := range mapTwo {
+		newMap[key] = fmt.Sprintf("[]->[%v]", value)
+	}
+	return newMap
 }
 
-func g(i int) {
-	if i > 3 {
-		fmt.Println("Panicking!")
-		panic(fmt.Sprintf("%v", i))
-	}
-	fmt.Println("Printing in g", i)
-	g(i + 1)
-}
+/**
+key一样 val 一样： key没有
+key一样 val 不一样： key "[v1]->[v2]"
 
-func gotoloop() {
-	for i := 0; i < 10; i++ {
-		if i > 3 {
-			goto LAbEL2
-		}
-		fmt.Println("i:", i)
-	LAbEL2:
-		fmt.Println("LastLAbEL:", i)
-	}
-}
+key 在m1 存在 ； 但在m2 不存在  ： key“[v1]->[ ]”
+反之一样
+*/
